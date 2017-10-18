@@ -33,7 +33,6 @@ function geoSuccess(pos) {
         success: function(response) {
             locate_me();
             parseResponse(response, renderMap)
-
             }
     });
 }
@@ -71,7 +70,6 @@ function parseResponse(data, callback) {
         coords.push(ol.proj.fromLonLat([data.resultSet.location[i].lng,
                 data.resultSet.location[i].lat],
             'EPSG:3857'));
-        console.log("Coords: " + coords);
 
         // Create new feature from each lon/lat pair
         points[i] = new ol.Feature({
@@ -86,10 +84,19 @@ function parseResponse(data, callback) {
         });
         let routes = points[i].getProperties().attributes.route;
         for (let i of routes) {
-            console.log(i.route);
-            $('#nearby-stops ol').append('<li>' + "Route Number: " + i.route + '</li>')
+            let baseURL = "https://trimet.org/schedules/img/";
+            let routeURL = function() {
+                if (String(i.route).length === 1) {
+                    return baseURL + "00" + String(i.route) + ".png"
+                } else if (String(i.route).length === 2) {
+                    return baseURL + "0" + String(i.route) + ".png"
+                } else {
+                    return baseURL + String(i.route) + ".png"
+                }
+            };
+            let url = routeURL();
+            $('#nearby-stops ol').append('<li><a href="' + url + '">' + "Route Number: " + i.route + '</a></li>');
         }
-
 
     }
     callback(points)
@@ -133,8 +140,6 @@ function renderMap(data) {
     map.addLayer(vector);
 }
 
-
-// Give a list of all of the bus lines that have stops within 100 meters of your current location.
 // Link each bus line to an href of its map
 
 
