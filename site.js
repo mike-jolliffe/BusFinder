@@ -45,11 +45,31 @@ function geoError(err) {
 navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
 
 function locate_me() {
-    var locationPoint = new ol.Feature({
-        geometry: new ol.geom.Point([lon, lat])
+    let pointStyle = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 5,
+            fill: new ol.style.Fill({
+                color: '#ffa500'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#000000',
+                width: 3
+            })
+        }),
+        text: new ol.style.Text({
+            text: "Current\nLocation\n",
+            textBaseline: "bottom"
+        })
     });
-    locationPoint.getGeometry().transform('EPSG:4326', 'EPSG:3857');
 
+    let locationPoint = new ol.Feature({
+        geometry: new ol.geom.Point([lon, lat]),
+    });
+
+    locationPoint.setStyle(pointStyle);
+
+    console.log(locationPoint.getStyle());
+    locationPoint.getGeometry().transform('EPSG:4326', 'EPSG:3857');
 
     // A vector layer to hold the location point
     var locationLayer = new ol.layer.Vector({
@@ -63,7 +83,7 @@ function locate_me() {
     map.setView(new ol.View({
         center: ol.proj.fromLonLat([lon, lat]),
         zoom: 17
-    }))
+    }));
 }
 
 function parseResponse(data, callback) {
@@ -84,7 +104,7 @@ function parseResponse(data, callback) {
                 'route': data.resultSet.location[i].route,
             },
             'i': i,
-            'size': 4
+            'size': 8
         });
         let routes = points[i].getProperties().attributes.route;
         for (let i of routes) {
@@ -101,7 +121,6 @@ function parseResponse(data, callback) {
             let url = routeURL();
             $('#nearby-stops ol').append('<li><a href="' + url + '">' + "Route Number: " + i.route + '</a></li>');
         }
-
     }
     callback(points)
 }
@@ -116,27 +135,15 @@ function renderMap(data) {
         source: vectorSource,
         style: function (feature) {
             var style = new ol.style.Style({
-                text: new ol.style.Text({
-                    textAlign: "Start",
-                    textBaseline: "Middle",
-                    font: 'Normal 12px Arial',
-                    text: "TESTING",//${feature.attributes.stop_id}',
-                    fill: new ol.style.Fill({
-                        color: '#ffa500',
-                        stroke: new ol.style.Stroke({
-                            color: '#000000',
-                            width: 3
-                        }),
-                        offsetX: -45,
-                        offsetY: 0,
-                        rotation: 0
-                    }),
-                }),
                 image: new ol.style.Circle({
                     radius: feature.get('size') * Math.pow(map.getView().getZoom(), 1.2) / 10,
                     fill: new ol.style.Fill({color: '#882211'}),
                     stroke: new ol.style.Stroke({color: '#DDDDDD', width: 1})
-                })
+                }),
+                text: new ol.style.Text({
+                    text: String(feature.getProperties().attributes.stop_id),
+                    fill: new ol.style.Fill({color: '#DDDDDD'}),
+                }),
             });
         return style
         }
