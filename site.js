@@ -60,6 +60,10 @@ function locate_me() {
         })
     });
     map.addLayer(locationLayer);
+    map.setView(new ol.View({
+        center: ol.proj.fromLonLat([lon, lat]),
+        zoom: 17
+    }))
 }
 
 function parseResponse(data, callback) {
@@ -140,7 +144,5 @@ function renderMap(data) {
     map.addLayer(vector);
 }
 
-// Link each bus line to an href of its map
-
-
+// Label stop numbers, migrate route map links to popouts on stops
 // Add buses to map, with your current location, stops within 100 meters, and live tracking
