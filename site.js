@@ -32,7 +32,8 @@ function geoSuccess(pos) {
         },
         success: function(response) {
             locate_me();
-            parseResponse(response, renderMap)
+            parseResponse(response, renderMap);
+            getBuses();
             }
     });
 }
@@ -125,13 +126,86 @@ function parseResponse(data, callback) {
     callback(points)
 }
 
+function getBuses() {
+
+    $.ajax({
+        type: "GET",
+        url: "https://developer.trimet.org/ws/v2/vehicles",
+        data: {
+            appID: key,
+            bbox: (lon - .1, lat - .1, lon + .1, lat + .1)
+        },
+        success: function(response) {
+            parseBuses(response, mapBuses)
+            }
+    });
+}
+
+function parseBuses(data, callback) {
+    let coords = [];
+    let points = new Array(data.resultSet.vehicle.length - 1);
+    for (let i = 0; i <= data.resultSet.vehicle.length - 1; i++) {
+        // Apply projection transformation to the geometries
+        coords.push(ol.proj.fromLonLat([data.resultSet.vehicle[i].longitude,
+                data.resultSet.vehicle[i].latitude],
+            'EPSG:3857'));
+
+        // Create new feature from each lon/lat pair
+        points[i] = new ol.Feature({
+            'geometry': new ol.geom.Point(
+                [coords[i][0], coords[i][1]]),
+            'attributes': {
+                'type': data.resultSet.vehicle[i].type,
+                'route': data.resultSet.vehicle[i].routeNumber,
+            },
+            'i': i,
+            'size': 5
+        });
+    }
+    callback(points)
+}
+
+function mapBuses(buses) {
+    let bus9 = [];
+    for (let bus of buses) {
+        if (bus.getProperties().attributes.route == 9) {
+            bus9.push(bus)
+        }
+    }
+    console.log(buses);
+    let bus_vectorSource = new ol.source.Vector({
+        features: bus9,
+        wrapX: false
+    });
+
+    let bus_vector = new ol.layer.Vector({
+        source: bus_vectorSource,
+        style: function (feature) {
+            var style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10 * Math.pow(map.getView().getZoom(), 1.2) / 10,
+                    fill: new ol.style.Fill({color: '#007700'}),
+                    stroke: new ol.style.Stroke({color: '#DDDDDD', width: 1})
+                }),
+                text: new ol.style.Text({
+                    text: String(feature.getProperties().attributes.route),
+                    fill: new ol.style.Fill({color: '#DDDDDD'}),
+                }),
+            });
+        return style
+        }
+    });
+    map.addLayer(bus_vector);
+}
+
+
 function renderMap(data) {
-    var vectorSource = new ol.source.Vector({
+    let vectorSource = new ol.source.Vector({
         features: data,
         wrapX: false
     });
 
-    var vector = new ol.layer.Vector({
+    let vector = new ol.layer.Vector({
         source: vectorSource,
         style: function (feature) {
             var style = new ol.style.Style({
@@ -151,5 +225,4 @@ function renderMap(data) {
     map.addLayer(vector);
 }
 
-// Label stop numbers, migrate route map links to popouts on stops
 // Add buses to map, with your current location, stops within 100 meters, and live tracking
