@@ -84,6 +84,13 @@ function parseResponse(data, callback) {
             'i': i,
             'size': 4
         });
+        let routes = points[i].getProperties().attributes.route;
+        for (let i of routes) {
+            console.log(i.route);
+            $('#nearby-stops ol').append('<li>' + "Route Number: " + i.route + '</li>')
+        }
+
+
     }
     callback(points)
 }
