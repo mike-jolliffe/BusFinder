@@ -136,7 +136,8 @@ function getBuses() {
             bbox: (lon - .1, lat - .1, lon + .1, lat + .1)
         },
         success: function(response) {
-            parseBuses(response, mapBuses)
+            parseBuses(response, mapBuses);
+            populateDropMenu(response)
             }
     });
 }
@@ -165,13 +166,20 @@ function parseBuses(data, callback) {
     callback(points)
 }
 
-function mapBuses(buses) {
+function populateDropMenu(buses) {
+    for(let bus of buses) {
+        $('.dropdowncontent').append('<h5>' + bus.getProperties().attributes.route + '</h5>')
+    }
+
+}
+
+function mapBuses(buses, callback) {
     let bus9 = [];
     if (bus_vector) {
         bus_vector.getSource().clear();
     }
     for (let bus of buses) {
-        if (bus.getProperties().attributes.route == 9) {
+        if (bus.getProperties().attributes.route == 14) {
             bus9.push(bus)
         }
     }
@@ -229,4 +237,4 @@ function renderMap(data) {
 }
 
 
-setInterval(getBuses, 10000);
+setInterval(getBuses, 5000);
