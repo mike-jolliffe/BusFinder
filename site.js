@@ -1,7 +1,7 @@
 import {key} from "./secret.js";
 
 let bus_vector;
-let bus_route = " ";
+let bus_route = "All Routes";
 let lon;
 let lat;
 let map = new ol.Map({
@@ -173,7 +173,7 @@ function mapBuses(buses) {
         bus_vector.getSource().clear();
     }
     for (let bus of buses) {
-        if (bus_route === " ") {
+        if (bus_route == "All Routes") {
             busX.push(bus)
         }
         else if (bus.getProperties().attributes.route == bus_route) {
