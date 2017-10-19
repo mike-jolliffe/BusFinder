@@ -1,5 +1,6 @@
 import {key} from "./secret.js";
 
+let bus_vector;
 let lon;
 let lat;
 let map = new ol.Map({
@@ -127,7 +128,6 @@ function parseResponse(data, callback) {
 }
 
 function getBuses() {
-
     $.ajax({
         type: "GET",
         url: "https://developer.trimet.org/ws/v2/vehicles",
@@ -167,6 +167,9 @@ function parseBuses(data, callback) {
 
 function mapBuses(buses) {
     let bus9 = [];
+    if (bus_vector) {
+        bus_vector.getSource().clear();
+    }
     for (let bus of buses) {
         if (bus.getProperties().attributes.route == 9) {
             bus9.push(bus)
@@ -178,7 +181,7 @@ function mapBuses(buses) {
         wrapX: false
     });
 
-    let bus_vector = new ol.layer.Vector({
+    bus_vector = new ol.layer.Vector({
         source: bus_vectorSource,
         style: function (feature) {
             var style = new ol.style.Style({
@@ -225,4 +228,5 @@ function renderMap(data) {
     map.addLayer(vector);
 }
 
-// Add buses to map, with your current location, stops within 100 meters, and live tracking
+
+setInterval(getBuses, 10000);
