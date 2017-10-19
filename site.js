@@ -122,6 +122,7 @@ function parseResponse(data, callback) {
             };
             let url = routeURL();
             $('#nearby-stops ol').append('<li><a href="' + url + '">' + "Route Number: " + i.route + '</a></li>');
+            $('.dropdowncontent select').append('<option value=" ' + i.route + '">' + "Route " + i.route + '</option>')
         }
     }
     callback(points)
@@ -137,7 +138,6 @@ function getBuses() {
         },
         success: function(response) {
             parseBuses(response, mapBuses);
-            populateDropMenu(response)
             }
     });
 }
@@ -164,13 +164,6 @@ function parseBuses(data, callback) {
         });
     }
     callback(points)
-}
-
-function populateDropMenu(buses) {
-    for(let bus of buses) {
-        $('.dropdowncontent').append('<h5>' + bus.getProperties().attributes.route + '</h5>')
-    }
-
 }
 
 function mapBuses(buses, callback) {
