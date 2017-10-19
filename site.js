@@ -1,6 +1,7 @@
 import {key} from "./secret.js";
 
 let bus_vector;
+let bus_route = " ";
 let lon;
 let lat;
 let map = new ol.Map({
@@ -166,19 +167,22 @@ function parseBuses(data, callback) {
     callback(points)
 }
 
-function mapBuses(buses, callback) {
-    let bus9 = [];
+function mapBuses(buses) {
+    let busX = [];
     if (bus_vector) {
         bus_vector.getSource().clear();
     }
     for (let bus of buses) {
-        if (bus.getProperties().attributes.route == 14) {
-            bus9.push(bus)
+        if (bus_route === " ") {
+            busX.push(bus)
+        }
+        else if (bus.getProperties().attributes.route == bus_route) {
+            busX.push(bus)
         }
     }
     console.log(buses);
     let bus_vectorSource = new ol.source.Vector({
-        features: bus9,
+        features: busX,
         wrapX: false
     });
 
@@ -229,5 +233,9 @@ function renderMap(data) {
     map.addLayer(vector);
 }
 
+$('#drop-btn').click(function() {
+    bus_route = $(this).next().find('select').val();
+    console.log(bus_route)
+});
 
 setInterval(getBuses, 5000);
