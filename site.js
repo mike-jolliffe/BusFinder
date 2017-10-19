@@ -234,7 +234,7 @@ function renderMap(data) {
 }
 
 $('#drop-btn').click(function() {
-    bus_route = $(this).next().find('select').val();
+    bus_route = $(this).prev().find('select').val();
     console.log(bus_route)
 });
 
