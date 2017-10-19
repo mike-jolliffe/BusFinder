@@ -2,6 +2,7 @@ import {key} from "./secret.js";
 
 let bus_vector;
 let bus_route = "All Routes";
+let route_lines;
 let lon;
 let lat;
 let map = new ol.Map({
@@ -203,6 +204,17 @@ function mapBuses(buses) {
         return style
         }
     });
+
+    route_lines = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            url: 'routes.kml',
+            format: new ol.format.KML({
+                extractStyles: false
+            })
+        })
+    });
+
+    map.addLayer(route_lines);
     map.addLayer(bus_vector);
 }
 
