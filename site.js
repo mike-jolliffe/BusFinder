@@ -30,7 +30,7 @@ function geoSuccess(pos) {
             appID: key,
             json: true,
             ll: position,
-            meters: 100,
+            meters: 500,
             showRoutes: true
         },
         success: function(response) {
@@ -211,13 +211,17 @@ function mapBuses(buses) {
             format: new ol.format.KML({
                 extractStyles: false
             })
-        })
+        }),
+        style: [
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({color: 'black', width: 2})
+            })
+        ]
     });
 
     map.addLayer(route_lines);
     map.addLayer(bus_vector);
 }
-
 
 function renderMap(data) {
     let vectorSource = new ol.source.Vector({
