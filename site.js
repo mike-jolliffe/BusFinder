@@ -2,8 +2,8 @@ import {key} from "./secret.js";
 
 let bus_vector;
 let bus_route = "All Routes";
-let route_lines = "routes.kml";
-let route_vector;
+let routes_vector;
+let routeLine_vector;
 let lon;
 let lat;
 let map = new ol.Map({
@@ -170,7 +170,7 @@ function parseBuses(data, callback) {
 }
 
 function vectorizeRoutes(callback) {
-    route_vector = new ol.layer.Vector({
+    routes_vector = new ol.layer.Vector({
         source: new ol.source.Vector({
             url: 'routes.kml',
             format: new ol.format.KML({
@@ -185,37 +185,34 @@ function vectorizeRoutes(callback) {
         ]
 
     });
-    let routes = route_vector.getProperties().source.o; //.source.o;
-    callback(routes);
+    callback(routes_vector);
 }
 
 function getRoute(routes) {
-    console.log(routes);
-    // for (let i of routes.o) {
-    //     console.log(i)
-    // }
-    //}
+    let routeX = [];
+    routes.once('change', function () {
+        routes.getSource().forEachFeature(function (feature) {
+            if (bus_route == "All Routes") {
+                routeX.push(feature)
+            } else if (feature.getProperties().route_number == bus_route) {
+                routeX.push(feature)
+            }
+        });
+    });
+    console.log(routeX);
+    return routeX
 }
-    // for (let route of routes) {
-    //     console.log(route[0].route_number);
-    //     // if (bus_route == "All Routes") {
-    //     //     routeX.push(route)
-    //     //     // TODO
-    //     // }
-    // }
 
-    // console.log(route_lines.getProperties().source.o);
-    // console.log(route_lines.getProperties().source.o[i].route_number);
+vectorizeRoutes(getRoute);
 
 function mapBuses(buses) {
     let busX = [];
-    let routeX = [];
     if (bus_vector) {
         bus_vector.getSource().clear();
     }
 
-    if (route_vector) {
-        route_vector.getSource().clear();
+    if (routeLine_vector) {
+        routeLine_vector.getSource().clear();
     }
 
     for (let bus of buses) {
@@ -249,10 +246,26 @@ function mapBuses(buses) {
         }
     });
 
-    vectorizeRoutes(getRoute);
+    let route_line = vectorizeRoutes(getRoute);
+    let routeLine_source = new ol.source.Vector({
+        features: route_line,
+        wrapX: false
+        });
+
+    routeLine_vector = new ol.layer.Vector({
+        source: routeLine_source,
+        style: function (feature) {
+            var style = new ol.style.Style({
+                    stroke: new ol.style.Stroke({color: 'black', width: 2})
+            });
+        return style
+        }
+    });
 
 
-    map.addLayer(route_vector);
+
+
+    map.addLayer(routeLine_vector);
     map.addLayer(bus_vector);
 }
 
