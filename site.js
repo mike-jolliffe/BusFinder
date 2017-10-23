@@ -17,7 +17,7 @@ let map = new ol.Map({
     })
 });
 
-
+// AJAX to execute if getting current position is successful
 function geoSuccess(pos) {
     let crd = pos.coords;
     lon = crd.longitude;
@@ -31,12 +31,15 @@ function geoSuccess(pos) {
             appID: key,
             json: true,
             ll: position,
-            meters: 500,
+            meters: 100,
             showRoutes: true
         },
         success: function(response) {
+            // Add my current location to the map
             locate_me();
+            // Parse object and map all bus stops
             parseResponse(response, renderMap);
+            // Send another AJAX for actual bus routes bounded by distance from current position
             getBuses();
             }
     });
@@ -169,6 +172,7 @@ function parseBuses(data, callback) {
     callback(points)
 }
 
+// Load in kml layer of bus routes
 function vectorizeRoutes(callback) {
     routes_vector = new ol.layer.Vector({
         source: new ol.source.Vector({
@@ -185,26 +189,28 @@ function vectorizeRoutes(callback) {
         ]
 
     });
+    console.log("ROUTES");
+    console.log(routes_vector);
     callback(routes_vector);
 }
 
+// filter kml of all routes to just selected route number
 function getRoute(routes) {
     let routeX = [];
-    routes.once('change', function () {
-        routes.getSource().forEachFeature(function (feature) {
-            if (bus_route == "All Routes") {
-                routeX.push(feature)
-            } else if (feature.getProperties().route_number == bus_route) {
-                routeX.push(feature)
-            }
-        });
-    });
-    console.log(routeX);
-    return routeX
+    // routes.once('change', function () {
+    //     routes.getSource().forEachFeature(function (feature) {
+    //         if (bus_route == "All Routes") {
+    //             routeX.push(feature)
+    //         } else if (feature.getProperties().route_number == bus_route) {
+    //             routeX.push(feature)
+    //         }
+    //     });
+    // });
+    // console.log(routeX);
+    // return routeX
 }
 
-vectorizeRoutes(getRoute);
-
+// Map relevant buses and their routes
 function mapBuses(buses) {
     let busX = [];
     if (bus_vector) {
@@ -246,6 +252,7 @@ function mapBuses(buses) {
         }
     });
 
+    // Create route vector for addition to map
     let route_line = vectorizeRoutes(getRoute);
     let routeLine_source = new ol.source.Vector({
         features: route_line,
@@ -262,13 +269,11 @@ function mapBuses(buses) {
         }
     });
 
-
-
-
     map.addLayer(routeLine_vector);
     map.addLayer(bus_vector);
 }
 
+// Map the bus stops
 function renderMap(data) {
     let vectorSource = new ol.source.Vector({
         features: data,
@@ -295,9 +300,11 @@ function renderMap(data) {
     map.addLayer(vector);
 }
 
+// Filter dropdown for bus routes of interest
 $('#drop-btn').click(function() {
     bus_route = $(this).prev().find('select').val();
     console.log(bus_route)
 });
 
-setInterval(getBuses, 5000);
+// Update real-time bus locations
+setInterval(getBuses, 10000);
