@@ -175,7 +175,7 @@ function parseBuses(data, callback) {
 // Load in kml layer of bus routes
 function vectorizeRoutes(callback) {
     if (routes_vector) {
-        routes_vector.getSource().clear();
+        map.removeLayer(routes_vector);
     }
     
     let route_num;
