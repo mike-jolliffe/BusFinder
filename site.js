@@ -31,7 +31,7 @@ function geoSuccess(pos) {
             appID: key,
             json: true,
             ll: position,
-            meters: 100,
+            meters: 500,
             showRoutes: true
         },
         success: function(response) {
@@ -174,9 +174,27 @@ function parseBuses(data, callback) {
 
 // Load in kml layer of bus routes
 function vectorizeRoutes(callback) {
+    if (routes_vector) {
+        routes_vector.getSource().clear();
+    }
+    
+    let route_num;
+    
+    if (bus_route.length === 1) {
+        route_num = "route00" + bus_route + ".kml"
+    } else if (String(bus_route).length === 2) {
+        route_num = "route0" + bus_route + ".kml"
+    } else if (String(bus_route).length === 3) {
+        route_num = "route" + String(bus_route) + ".kml"
+    } else {
+        route_num = 'routes.kml'
+    }
+
+    console.log(route_num);
+
     routes_vector = new ol.layer.Vector({
         source: new ol.source.Vector({
-            url: 'routes.kml',
+            url: 'split_routes/' + route_num,
             format: new ol.format.KML({
                 extractStyles: false,
                 extractAttributes: true
@@ -191,12 +209,13 @@ function vectorizeRoutes(callback) {
     });
     console.log("ROUTES");
     console.log(routes_vector);
-    callback(routes_vector);
+    map.addLayer(routes_vector);
+    return callback(routes_vector);
 }
 
 // filter kml of all routes to just selected route number
 function getRoute(routes) {
-    let routeX = [];
+    // let routeX = [];
     // routes.once('change', function () {
     //     routes.getSource().forEachFeature(function (feature) {
     //         if (bus_route == "All Routes") {
@@ -252,24 +271,25 @@ function mapBuses(buses) {
         }
     });
 
+    vectorizeRoutes(getRoute);
     // Create route vector for addition to map
-    let route_line = vectorizeRoutes(getRoute);
-    let routeLine_source = new ol.source.Vector({
-        features: route_line,
-        wrapX: false
-        });
-
-    routeLine_vector = new ol.layer.Vector({
-        source: routeLine_source,
-        style: function (feature) {
-            var style = new ol.style.Style({
-                    stroke: new ol.style.Stroke({color: 'black', width: 2})
-            });
-        return style
-        }
-    });
-
-    map.addLayer(routeLine_vector);
+    // let route_line = vectorizeRoutes(getRoute);
+    // let routeLine_source = new ol.source.Vector({
+    //     features: route_line,
+    //     wrapX: false
+    //     });
+    //
+    // routeLine_vector = new ol.layer.Vector({
+    //     source: routeLine_source,
+    //     style: function (feature) {
+    //         var style = new ol.style.Style({
+    //                 stroke: new ol.style.Stroke({color: 'black', width: 2})
+    //         });
+    //     return style
+    //     }
+    // });
+    //
+    // map.addLayer(routeLine_vector);
     map.addLayer(bus_vector);
 }
 
@@ -303,7 +323,7 @@ function renderMap(data) {
 // Filter dropdown for bus routes of interest
 $('#drop-btn').click(function() {
     bus_route = $(this).prev().find('select').val();
-    console.log(bus_route)
+    bus_route = bus_route.replace(/ /g, '')
 });
 
 // Update real-time bus locations
