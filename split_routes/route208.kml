@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="routes_route_number_208" id="routes_route_number_208">
+	<SimpleField name="descriptio" type="string"></SimpleField>
+	<SimpleField name="timestamp" type="string"></SimpleField>
+	<SimpleField name="begin" type="string"></SimpleField>
+	<SimpleField name="end" type="string"></SimpleField>
+	<SimpleField name="altitudeMo" type="string"></SimpleField>
+	<SimpleField name="tessellate" type="int"></SimpleField>
+	<SimpleField name="extrude" type="int"></SimpleField>
+	<SimpleField name="visibility" type="int"></SimpleField>
+	<SimpleField name="drawOrder" type="int"></SimpleField>
+	<SimpleField name="icon" type="string"></SimpleField>
+	<SimpleField name="route_numb" type="string"></SimpleField>
+	<SimpleField name="direction" type="string"></SimpleField>
+	<SimpleField name="route_desc" type="string"></SimpleField>
+	<SimpleField name="public_rou" type="string"></SimpleField>
+	<SimpleField name="direction_" type="string"></SimpleField>
+	<SimpleField name="frequent" type="string"></SimpleField>
+	<SimpleField name="type" type="string"></SimpleField>
+</Schema>
+<Folder><name>routes_route_number_208</name>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#routes_route_number_208">
+		<SimpleData name="tessellate">-1</SimpleData>
+		<SimpleData name="extrude">0</SimpleData>
+		<SimpleData name="visibility">-1</SimpleData>
+		<SimpleData name="route_numb">208</SimpleData>
+		<SimpleData name="direction">1</SimpleData>
+		<SimpleData name="route_desc">Portland Aerial Tram</SimpleData>
+		<SimpleData name="public_rou">None</SimpleData>
+		<SimpleData name="direction_">To Marquam Hill</SimpleData>
+		<SimpleData name="frequent">False</SimpleData>
+		<SimpleData name="type">AT</SimpleData>
+	</SchemaData></ExtendedData>
+      <LineString><coordinates>-122.671674,45.499292 -122.672686,45.499318 -122.673703,45.499333 -122.674913,45.499345 -122.676373,45.499371 -122.677822,45.499388 -122.680266,45.499425 -122.682794,45.499468 -122.683919,45.499489</coordinates></LineString>
+  </Placemark>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#routes_route_number_208">
+		<SimpleData name="tessellate">-1</SimpleData>
+		<SimpleData name="extrude">0</SimpleData>
+		<SimpleData name="visibility">-1</SimpleData>
+		<SimpleData name="route_numb">208</SimpleData>
+		<SimpleData name="direction">0</SimpleData>
+		<SimpleData name="route_desc">Portland Aerial Tram</SimpleData>
+		<SimpleData name="public_rou">None</SimpleData>
+		<SimpleData name="direction_">To South Waterfront</SimpleData>
+		<SimpleData name="frequent">False</SimpleData>
+		<SimpleData name="type">AT</SimpleData>
+	</SchemaData></ExtendedData>
+      <LineString><coordinates>-122.683919,45.499489 -122.682794,45.499468 -122.680266,45.499425 -122.677822,45.499388 -122.676373,45.499371 -122.674913,45.499345 -122.673703,45.499333 -122.672686,45.499318 -122.671674,45.499292</coordinates></LineString>
+  </Placemark>
+</Folder>
+</Document></kml>
