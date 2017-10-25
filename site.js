@@ -94,6 +94,7 @@ function locate_me() {
     }));
 }
 
+// Create bus stops
 function parseResponse(data, callback) {
     let coords = [];
     let points = new Array(data.resultSet.location.length - 1);
@@ -115,20 +116,18 @@ function parseResponse(data, callback) {
             'size': 8
         });
         let routes = points[i].getProperties().attributes.route;
+
         for (let i of routes) {
-        //     let baseURL = "https://trimet.org/schedules/img/";
-        //     let routeURL = function() {
-        //         if (String(i.route).length === 1) {
-        //             return baseURL + "00" + String(i.route) + ".png"
-        //         } else if (String(i.route).length === 2) {
-        //             return baseURL + "0" + String(i.route) + ".png"
-        //         } else {
-        //             return baseURL + String(i.route) + ".png"
-        //         }
-        //     };
-        //     let url = routeURL();
-        //     $('#nearby-stops ol').append('<li><a href="' + url + '">' + "Route Number: " + i.route + '</a></li>');
-            $('.dropdowncontent select').append('<option value=" ' + i.route + '">' + "Route " + i.route + '</option>')
+            var exists = false;
+            $('.dropdowncontent select option').each(function(){
+                if (this.value == i.route) {
+                    exists = true;
+                }
+            });
+
+            if (exists == false) {
+                $('.dropdowncontent select').append('<option value=" ' + i.route + '">' + "Route " + i.route + '</option>')
+            }
         }
     }
     callback(points)
@@ -148,6 +147,7 @@ function getBuses() {
     });
 }
 
+// Create buses
 function parseBuses(data, callback) {
     let coords = [];
     let points = new Array(data.resultSet.vehicle.length - 1);
@@ -172,7 +172,7 @@ function parseBuses(data, callback) {
     callback(points)
 }
 
-// Load in kml layer of bus routes
+// Load bus routes
 function vectorizeRoutes(callback) {
     if (routes_vector) {
         map.removeLayer(routes_vector);
@@ -213,21 +213,9 @@ function vectorizeRoutes(callback) {
     callback(routes_vector);
 }
 
-// filter kml of all routes to just selected route number
+// Map routes
 function getRoute(routes) {
     map.addLayer(routes);
-    // let routeX = [];
-    // routes.once('change', function () {
-    //     routes.getSource().forEachFeature(function (feature) {
-    //         if (bus_route == "All Routes") {
-    //             routeX.push(feature)
-    //         } else if (feature.getProperties().route_number == bus_route) {
-    //             routeX.push(feature)
-    //         }
-    //     });
-    // });
-    // console.log(routeX);
-    // return routeX
 }
 
 // Map relevant buses and their routes
@@ -271,25 +259,6 @@ function mapBuses(buses) {
         return style
         }
     });
-
-
-    // Create route vector for addition to map
-    // let route_line = vectorizeRoutes(getRoute);
-    // let routeLine_source = new ol.source.Vector({
-    //     features: route_line,
-    //     wrapX: false
-    //     });
-    //
-    // routeLine_vector = new ol.layer.Vector({
-    //     source: routeLine_source,
-    //     style: function (feature) {
-    //         var style = new ol.style.Style({
-    //                 stroke: new ol.style.Stroke({color: 'black', width: 2})
-    //         });
-    //     return style
-    //     }
-    // });
-    //
 
     map.addLayer(bus_vector);
 
