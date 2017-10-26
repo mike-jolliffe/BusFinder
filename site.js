@@ -34,19 +34,19 @@ function geoSuccess(pos) {
             meters: 500,
             showRoutes: true
         },
-        success: function(response) {
+        success: function (response) {
             // Add my current location to the map
             locate_me();
             // Parse object and map all bus stops
             parseResponse(response, renderMap);
             // Send another AJAX for actual bus routes bounded by distance from current position
             getBuses();
-            }
+        }
     });
 }
 
 function geoError(err) {
-  console.warn(`ERROR(${err.code}): ${err.message}`);
+    console.warn(`ERROR(${err.code}): ${err.message}`);
 }
 
 // Get current location and run app
@@ -119,7 +119,7 @@ function parseResponse(data, callback) {
 
         for (let i of routes) {
             var exists = false;
-            $('.dropdowncontent select option').each(function(){
+            $('.dropdowncontent select option').each(function () {
                 if (this.value == i.route) {
                     exists = true;
                 }
@@ -134,6 +134,7 @@ function parseResponse(data, callback) {
 }
 
 function getBuses() {
+    // Get vehicle locations
     $.ajax({
         type: "GET",
         url: "https://developer.trimet.org/ws/v2/vehicles",
@@ -141,10 +142,28 @@ function getBuses() {
             appID: key,
             bbox: (lon - .1, lat - .1, lon + .1, lat + .1)
         },
-        success: function(response) {
+        success: function (response) {
             parseBuses(response, mapBuses);
-            }
+        }
     });
+
+    // Get arrival times for limited subset of routes selected by user
+    if (!(bus_route == "All Routes")) {
+        $.ajax({
+            type: "GET",
+            url: "https://developer.trimet.org/ws/V1/arrivals",
+            data: {
+                appID: key,
+                locIDs: bus_route,
+                json: "true",
+            },
+            success: function(response) {
+                console.log("Arrivals details");
+                console.log(response)
+            }
+        })
+    }
+
 }
 
 // Create buses
@@ -177,9 +196,9 @@ function vectorizeRoutes(callback) {
     if (routes_vector) {
         map.removeLayer(routes_vector);
     }
-    
+
     let route_num;
-    
+
     if (bus_route.length === 1) {
         route_num = "route00" + bus_route + ".kml"
     } else if (String(bus_route).length === 2) {
@@ -256,7 +275,7 @@ function mapBuses(buses) {
                     fill: new ol.style.Fill({color: '#DDDDDD'}),
                 }),
             });
-        return style
+            return style
         }
     });
 
@@ -285,14 +304,14 @@ function renderMap(data) {
                     fill: new ol.style.Fill({color: '#DDDDDD'}),
                 }),
             });
-        return style
+            return style
         }
     });
     map.addLayer(vector);
 }
 
 // Filter dropdown for bus routes of interest
-$('#drop-btn').click(function() {
+$('#drop-btn').click(function () {
     bus_route = $(this).prev().find('select').val();
     bus_route = bus_route.replace(/ /g, '');
     vectorizeRoutes(getRoute);
