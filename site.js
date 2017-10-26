@@ -283,7 +283,7 @@ function mapBuses(buses) {
 
 }
 
-// Map the bus stops
+// Map bus stops
 function renderMap(data) {
     let vectorSource = new ol.source.Vector({
         features: data,
@@ -316,6 +316,8 @@ $('#drop-btn').click(function () {
     bus_route = bus_route.replace(/ /g, '');
     vectorizeRoutes(getRoute);
 });
+
+$('') //TODO when user clicks on the stop,
 
 // Update real-time bus locations
 vectorizeRoutes(getRoute);

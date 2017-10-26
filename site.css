@@ -1,3 +1,23 @@
+#header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+				linear-gradient(
+					rgba(255, 255, 255, 0.5),
+					rgba(255, 255, 255, 0.5)
+				),
+				url('bus_banner.jpg');
+	background-size: cover;
+    height: 25vh;
+}
+
+#PageTitle {
+    opacity: 1.0;
+    color: #222222;
+    font-size: 3em;
+}
+
 .dropdowncontent {
     display: inline;
 }
