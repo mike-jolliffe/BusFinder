@@ -5,7 +5,7 @@ let vector;
 let bus_vector;
 let bus_route = "All Routes";
 let routes_vector;
-let routeLine_vector;
+let arrivalsObj;
 let lon;
 let lat;
 let map = new ol.Map({
@@ -141,8 +141,6 @@ function stringifyStops() {
     for (let point of points) {
         stopString.push(parseInt(point.getProperties().attributes.stop_id))
     }
-    console.log("STOPS");
-    console.log(stopString);
     return stopString
     }
 
@@ -172,7 +170,8 @@ function getBuses() {
             },
             success: function(response) {
                 console.log("Arrivals details");
-                console.log(response)
+                //console.log(response)
+                parseStops(response);
             }
         })
     }
@@ -202,6 +201,24 @@ function parseBuses(data, callback) {
         });
     }
     callback(points)
+}
+
+// Get bus arrival times by stop
+function parseStops(data) {
+    arrivalsObj = {};
+    for (let bus of data.resultSet.arrival) {
+        let arrival_time = new Date(bus.estimated);
+        let full_minutes = function(){
+            if (arrival_time.getMinutes() < 10) {
+                return "0" + arrival_time.getMinutes()
+            } else {
+                return arrival_time.getMinutes()
+            }
+        };
+        let time = arrival_time.getHours() - 12 + ":" + full_minutes();
+        console.log("StopID: " + bus.locid + ", " + "Arrival Time: " + time);
+        arrivalsObj[String(bus.locid)] = time
+    }
 }
 
 // Load bus routes
@@ -241,7 +258,6 @@ function vectorizeRoutes(callback) {
     });
     console.log("ROUTES");
     console.log(routes_vector.getProperties());
-    //map.addLayer(routes_vector);
     callback(routes_vector);
 }
 
@@ -304,6 +320,7 @@ function validStops() {
             stopsSubset.push(stop)
         }
     }
+    points = stopsSubset;
 
     let stopsSource = new ol.source.Vector({
         features: stopsSubset,
@@ -320,7 +337,7 @@ function validStops() {
                     stroke: new ol.style.Stroke({color: '#DDDDDD', width: 1})
                 }),
                 text: new ol.style.Text({
-                    text: String(feature.getProperties().attributes.stop_id),
+                    text: arrivalsObj[feature.getProperties().attributes.stop_id] || feature.getProperties().attributes.stop_id,
                     fill: new ol.style.Fill({color: '#DDDDDD'}),
                 }),
             });
@@ -368,4 +385,4 @@ $('#drop-btn').click(function () {
 
 // Update real-time bus locations
 vectorizeRoutes(getRoute);
-setInterval(getBuses, 4000);
+setInterval(getBuses, 15000);
