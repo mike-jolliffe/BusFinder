@@ -6,12 +6,13 @@
     align-items: center;
     background:
 				linear-gradient(
-					rgba(255, 255, 255, 0.5),
-					rgba(255, 255, 255, 0.5)
+					rgba(255, 255, 255, 0.35),
+					rgba(255, 255, 255, 0.35)
 				),
 				url('bus_banner.jpg');
 	background-size: cover;
     height: 30vh;
+    border: 1px solid #aaaaaa;
 }
 
 #PageTitle {
@@ -23,6 +24,7 @@
 }
 
 h5 {
+    color: #222222;
     margin-top: 5px;
     margin-bottom: 15px;
     font-size: 1.3em;
