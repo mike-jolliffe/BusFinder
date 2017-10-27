@@ -266,7 +266,7 @@ function getRoute(routes) {
     map.addLayer(routes);
 }
 
-// Map relevant buses and their stops
+// Map relevant buses
 function mapBuses(buses) {
     let busX = [];
     if (bus_vector) {
@@ -344,6 +344,7 @@ function validStops() {
             return style
         }
     });
+    vector.setZIndex(1);
     map.addLayer(vector);
 }
 
@@ -385,4 +386,4 @@ $('#drop-btn').click(function () {
 
 // Update real-time bus locations
 vectorizeRoutes(getRoute);
-setInterval(getBuses, 15000);
+setInterval(getBuses, 4000);
