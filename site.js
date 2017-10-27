@@ -135,6 +135,17 @@ function parseResponse(data, callback) {
     callback(points)
 }
 
+// Make stops into comma separated values to pass into API
+function stringifyStops() {
+    let stopString = [];
+    for (let point of points) {
+        stopString.push(parseInt(point.getProperties().attributes.stop_id))
+    }
+    console.log("STOPS");
+    console.log(stopString);
+    return stopString
+    }
+
 function getBuses() {
     // Get vehicle locations
     $.ajax({
@@ -149,22 +160,22 @@ function getBuses() {
         }
     });
 
-    // Get arrival times for limited subset of routes selected by user
-    // if (!(bus_route == "All Routes")) {
-    //     $.ajax({
-    //         type: "GET",
-    //         url: "https://developer.trimet.org/ws/V1/arrivals",
-    //         data: {
-    //             appID: key,
-    //             locIDs: bus_route,
-    //             json: "true",
-    //         },
-    //         success: function(response) {
-    //             console.log("Arrivals details");
-    //             console.log(response)
-    //         }
-    //     })
-    // }
+    //Get arrival times for limited subset of routes selected by user
+    if (!(bus_route == "All Routes")) {
+        $.ajax({
+            type: "GET",
+            url: "https://developer.trimet.org/ws/V1/arrivals",
+            data: {
+                appID: key,
+                locIDs: stringifyStops,
+                json: "true",
+            },
+            success: function(response) {
+                console.log("Arrivals details");
+                console.log(response)
+            }
+        })
+    }
 
 }
 
@@ -281,7 +292,7 @@ function mapBuses(buses) {
 
 }
 
-// Limit to only stops associated with chosen routes
+// Limit to stops associated with chosen routes
 function validStops() {
     let stopsSubset = [];
     if (!(bus_route == "All Routes")) {
@@ -299,7 +310,7 @@ function validStops() {
         wrapX: false
     });
 
-    let stopsLayer = new ol.layer.Vector({
+    vector = new ol.layer.Vector({
         source: stopsSource,
         style: function (feature) {
             var style = new ol.style.Style({
@@ -316,10 +327,10 @@ function validStops() {
             return style
         }
     });
-    map.addLayer(stopsLayer)
+    map.addLayer(vector);
 }
 
-// Map bus stops
+// Map all nearby bus stops initially
 function renderMap(data) {
     let vectorSource = new ol.source.Vector({
         features: data,
