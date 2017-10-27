@@ -1,5 +1,7 @@
 import {key} from "./secret.js";
 
+let points;
+let vector;
 let bus_vector;
 let bus_route = "All Routes";
 let routes_vector;
@@ -97,7 +99,7 @@ function locate_me() {
 // Create bus stops
 function parseResponse(data, callback) {
     let coords = [];
-    let points = new Array(data.resultSet.location.length - 1);
+    points = new Array(data.resultSet.location.length - 1);
     for (let i = 0; i <= data.resultSet.location.length - 1; i++) {
         // Apply projection transformation to the geometries
         coords.push(ol.proj.fromLonLat([data.resultSet.location[i].lng,
@@ -148,21 +150,21 @@ function getBuses() {
     });
 
     // Get arrival times for limited subset of routes selected by user
-    if (!(bus_route == "All Routes")) {
-        $.ajax({
-            type: "GET",
-            url: "https://developer.trimet.org/ws/V1/arrivals",
-            data: {
-                appID: key,
-                locIDs: bus_route,
-                json: "true",
-            },
-            success: function(response) {
-                console.log("Arrivals details");
-                console.log(response)
-            }
-        })
-    }
+    // if (!(bus_route == "All Routes")) {
+    //     $.ajax({
+    //         type: "GET",
+    //         url: "https://developer.trimet.org/ws/V1/arrivals",
+    //         data: {
+    //             appID: key,
+    //             locIDs: bus_route,
+    //             json: "true",
+    //         },
+    //         success: function(response) {
+    //             console.log("Arrivals details");
+    //             console.log(response)
+    //         }
+    //     })
+    // }
 
 }
 
@@ -227,7 +229,7 @@ function vectorizeRoutes(callback) {
 
     });
     console.log("ROUTES");
-    console.log(routes_vector);
+    console.log(routes_vector.getProperties());
     //map.addLayer(routes_vector);
     callback(routes_vector);
 }
@@ -237,15 +239,11 @@ function getRoute(routes) {
     map.addLayer(routes);
 }
 
-// Map relevant buses and their routes
+// Map relevant buses and their stops
 function mapBuses(buses) {
     let busX = [];
     if (bus_vector) {
         bus_vector.getSource().clear();
-    }
-
-    if (routeLine_vector) {
-        routeLine_vector.getSource().clear();
     }
 
     for (let bus of buses) {
@@ -283,6 +281,44 @@ function mapBuses(buses) {
 
 }
 
+// Limit to only stops associated with chosen routes
+function validStops() {
+    let stopsSubset = [];
+    if (!(bus_route == "All Routes")) {
+        map.removeLayer(vector)
+    }
+
+    for (let stop of points) {
+        if (stop.getProperties().attributes.route[0].route == bus_route) {
+            stopsSubset.push(stop)
+        }
+    }
+
+    let stopsSource = new ol.source.Vector({
+        features: stopsSubset,
+        wrapX: false
+    });
+
+    let stopsLayer = new ol.layer.Vector({
+        source: stopsSource,
+        style: function (feature) {
+            var style = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: feature.get('size') * Math.pow(map.getView().getZoom(), 1.2) / 10,
+                    fill: new ol.style.Fill({color: '#882211'}),
+                    stroke: new ol.style.Stroke({color: '#DDDDDD', width: 1})
+                }),
+                text: new ol.style.Text({
+                    text: String(feature.getProperties().attributes.stop_id),
+                    fill: new ol.style.Fill({color: '#DDDDDD'}),
+                }),
+            });
+            return style
+        }
+    });
+    map.addLayer(stopsLayer)
+}
+
 // Map bus stops
 function renderMap(data) {
     let vectorSource = new ol.source.Vector({
@@ -290,7 +326,7 @@ function renderMap(data) {
         wrapX: false
     });
 
-    let vector = new ol.layer.Vector({
+    vector = new ol.layer.Vector({
         source: vectorSource,
         style: function (feature) {
             var style = new ol.style.Style({
@@ -314,10 +350,10 @@ function renderMap(data) {
 $('#drop-btn').click(function () {
     bus_route = $(this).prev().find('select').val();
     bus_route = bus_route.replace(/ /g, '');
+    validStops();
     vectorizeRoutes(getRoute);
 });
 
-$('') //TODO when user clicks on the stop,
 
 // Update real-time bus locations
 vectorizeRoutes(getRoute);
