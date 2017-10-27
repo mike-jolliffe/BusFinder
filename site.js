@@ -170,7 +170,7 @@ function getBuses() {
             },
             success: function(response) {
                 console.log("Arrivals details");
-                //console.log(response)
+                console.log(response);
                 parseStops(response);
             }
         })
