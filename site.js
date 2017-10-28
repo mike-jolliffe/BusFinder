@@ -1,14 +1,25 @@
 import {key} from "./secret.js";
 
+// All bus stop point features
 let all_points;
+// Selected subset of bus stop point features
 let subset_points;
-let vector;
+// vector layer of all bus stops
+let stops_vector;
+// vector layer of all buses
 let bus_vector;
+// placeholder for selected bus route
 let bus_route = "All Routes";
+// vector layer for selected route
 let routes_vector;
+// object storing arrival times by bus stop
 let arrivalsObj;
+// current longitude
 let lon;
+// current latitude
 let lat;
+
+// map object
 let map = new ol.Map({
     layers: [
         new ol.layer.Tile({source: new ol.source.OSM()}),
@@ -48,6 +59,7 @@ function geoSuccess(pos) {
     });
 }
 
+// if getting current location fails
 function geoError(err) {
     console.warn(`ERROR(${err.code}): ${err.message}`);
 }
@@ -55,6 +67,7 @@ function geoError(err) {
 // Get current location and run app
 navigator.geolocation.getCurrentPosition(geoSuccess, geoError);
 
+// Map current location of user
 function locate_me() {
     let pointStyle = new ol.style.Style({
         image: new ol.style.Circle({
@@ -313,7 +326,7 @@ function validStops() {
     let stopsSubset = [];
     console.log(bus_route);
     if (!(bus_route == "All Routes")) {
-        map.removeLayer(vector)
+        map.removeLayer(stops_vector)
     }
 
     for (let stop of all_points) {
@@ -328,7 +341,7 @@ function validStops() {
         wrapX: false
     });
 
-    vector = new ol.layer.Vector({
+    stops_vector = new ol.layer.Vector({
         source: stopsSource,
         style: function (feature) {
             var style = new ol.style.Style({
@@ -345,8 +358,8 @@ function validStops() {
             return style
         }
     });
-    vector.setZIndex(1);
-    map.addLayer(vector);
+    stops_vector.setZIndex(1);
+    map.addLayer(stops_vector);
 }
 
 // Map all nearby bus stops initially
@@ -356,7 +369,7 @@ function renderMap(data) {
         wrapX: false
     });
 
-    vector = new ol.layer.Vector({
+    stops_vector = new ol.layer.Vector({
         source: vectorSource,
         style: function (feature) {
             var style = new ol.style.Style({
@@ -373,7 +386,7 @@ function renderMap(data) {
             return style
         }
     });
-    map.addLayer(vector);
+    map.addLayer(stops_vector);
 }
 
 // Filter dropdown for bus routes of interest
