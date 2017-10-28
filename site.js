@@ -1,6 +1,7 @@
 import {key} from "./secret.js";
 
-let points;
+let all_points;
+let subset_points;
 let vector;
 let bus_vector;
 let bus_route = "All Routes";
@@ -19,7 +20,7 @@ let map = new ol.Map({
     })
 });
 
-// AJAX to execute if getting current position is successful
+// Get nearby bus stops
 function geoSuccess(pos) {
     let crd = pos.coords;
     lon = crd.longitude;
@@ -99,7 +100,7 @@ function locate_me() {
 // Create bus stops
 function parseResponse(data, callback) {
     let coords = [];
-    points = new Array(data.resultSet.location.length - 1);
+    all_points = new Array(data.resultSet.location.length - 1);
     for (let i = 0; i <= data.resultSet.location.length - 1; i++) {
         // Apply projection transformation to the geometries
         coords.push(ol.proj.fromLonLat([data.resultSet.location[i].lng,
@@ -107,7 +108,7 @@ function parseResponse(data, callback) {
             'EPSG:3857'));
 
         // Create new feature from each lon/lat pair
-        points[i] = new ol.Feature({
+        all_points[i] = new ol.Feature({
             'geometry': new ol.geom.Point(
                 [coords[i][0], coords[i][1]]),
             'attributes': {
@@ -117,7 +118,7 @@ function parseResponse(data, callback) {
             'i': i,
             'size': 8
         });
-        let routes = points[i].getProperties().attributes.route;
+        let routes = all_points[i].getProperties().attributes.route;
 
         for (let i of routes) {
             var exists = false;
@@ -132,13 +133,13 @@ function parseResponse(data, callback) {
             }
         }
     }
-    callback(points)
+    callback(all_points)
 }
 
-// Make stops into comma separated values to pass into API
+// Make stops into array of ints to pass into API
 function stringifyStops() {
     let stopString = [];
-    for (let point of points) {
+    for (let point of subset_points) {
         stopString.push(parseInt(point.getProperties().attributes.stop_id))
     }
     return stopString
@@ -171,17 +172,16 @@ function getBuses() {
             success: function(response) {
                 console.log("Arrivals details");
                 console.log(response);
-                parseStops(response);
+                parseStops(response, validStops);
             }
         })
     }
-
 }
 
 // Create buses
 function parseBuses(data, callback) {
     let coords = [];
-    let points = new Array(data.resultSet.vehicle.length - 1);
+    let busPoints = new Array(data.resultSet.vehicle.length - 1);
     for (let i = 0; i <= data.resultSet.vehicle.length - 1; i++) {
         // Apply projection transformation to the geometries
         coords.push(ol.proj.fromLonLat([data.resultSet.vehicle[i].longitude,
@@ -189,7 +189,7 @@ function parseBuses(data, callback) {
             'EPSG:3857'));
 
         // Create new feature from each lon/lat pair
-        points[i] = new ol.Feature({
+        busPoints[i] = new ol.Feature({
             'geometry': new ol.geom.Point(
                 [coords[i][0], coords[i][1]]),
             'attributes': {
@@ -200,11 +200,11 @@ function parseBuses(data, callback) {
             'size': 5
         });
     }
-    callback(points)
+    callback(busPoints)
 }
 
 // Get bus arrival times by stop
-function parseStops(data) {
+function parseStops(data, callback) {
     arrivalsObj = {};
     for (let bus of data.resultSet.arrival) {
         let arrival_time = new Date(bus.estimated);
@@ -219,6 +219,7 @@ function parseStops(data) {
         console.log("StopID: " + bus.locid + ", " + "Arrival Time: " + time);
         arrivalsObj[String(bus.locid)] = time
     }
+    callback()
 }
 
 // Load bus routes
@@ -305,22 +306,22 @@ function mapBuses(buses) {
     });
 
     map.addLayer(bus_vector);
-
 }
 
 // Limit to stops associated with chosen routes
 function validStops() {
     let stopsSubset = [];
+    console.log(bus_route);
     if (!(bus_route == "All Routes")) {
         map.removeLayer(vector)
     }
 
-    for (let stop of points) {
+    for (let stop of all_points) {
         if (stop.getProperties().attributes.route[0].route == bus_route) {
             stopsSubset.push(stop)
         }
     }
-    points = stopsSubset;
+    subset_points = stopsSubset;
 
     let stopsSource = new ol.source.Vector({
         features: stopsSubset,
