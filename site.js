@@ -1,3 +1,4 @@
+// API key for accessing TriMet data
 import {key} from "./secret.js";
 
 // All bus stop point features
@@ -19,7 +20,7 @@ let lon;
 // current latitude
 let lat;
 
-// map object
+// declare map object
 let map = new ol.Map({
     layers: [
         new ol.layer.Tile({source: new ol.source.OSM()}),
@@ -31,7 +32,7 @@ let map = new ol.Map({
     })
 });
 
-// Get nearby bus stops
+// Get data for nearby bus stops
 function geoSuccess(pos) {
     let crd = pos.coords;
     lon = crd.longitude;
@@ -92,7 +93,6 @@ function locate_me() {
 
     locationPoint.setStyle(pointStyle);
 
-    console.log(locationPoint.getStyle());
     locationPoint.getGeometry().transform('EPSG:4326', 'EPSG:3857');
 
     // A vector layer to hold the location point
@@ -110,7 +110,7 @@ function locate_me() {
     }));
 }
 
-// Create bus stops
+// Create bus stop layer
 function parseResponse(data, callback) {
     let coords = [];
     all_points = new Array(data.resultSet.location.length - 1);
@@ -149,7 +149,7 @@ function parseResponse(data, callback) {
     callback(all_points)
 }
 
-// Make stops into array of ints to pass into API
+// Create list of stops to pass into API
 function stringifyStops() {
     let stopString = [];
     for (let point of subset_points) {
@@ -158,8 +158,8 @@ function stringifyStops() {
     return stopString
     }
 
+// Get bus data
 function getBuses() {
-    // Get vehicle locations
     $.ajax({
         type: "GET",
         url: "https://developer.trimet.org/ws/v2/vehicles",
@@ -183,15 +183,13 @@ function getBuses() {
                 json: "true",
             },
             success: function(response) {
-                console.log("Arrivals details");
-                console.log(response);
                 parseStops(response, validStops);
             }
         })
     }
 }
 
-// Create buses
+// Create buses layer
 function parseBuses(data, callback) {
     let coords = [];
     let busPoints = new Array(data.resultSet.vehicle.length - 1);
@@ -229,13 +227,13 @@ function parseStops(data, callback) {
             }
         };
         let time = arrival_time.getHours() - 12 + ":" + full_minutes();
-        console.log("StopID: " + bus.locid + ", " + "Arrival Time: " + time);
+        //console.log("StopID: " + bus.locid + ", " + "Arrival Time: " + time);
         arrivalsObj[String(bus.locid)] = time
     }
     callback()
 }
 
-// Load bus routes
+// Create bus routes layer
 function vectorizeRoutes(callback) {
     if (routes_vector) {
         map.removeLayer(routes_vector);
@@ -253,8 +251,6 @@ function vectorizeRoutes(callback) {
         route_num = 'routes.kml'
     }
 
-    console.log(route_num);
-
     routes_vector = new ol.layer.Vector({
         source: new ol.source.Vector({
             url: 'split_routes/' + route_num,
@@ -270,17 +266,16 @@ function vectorizeRoutes(callback) {
         ]
 
     });
-    console.log("ROUTES");
-    console.log(routes_vector.getProperties());
+
     callback(routes_vector);
 }
 
-// Map routes
+// Add route layer to map
 function getRoute(routes) {
     map.addLayer(routes);
 }
 
-// Map relevant buses
+// Add bus layer to map
 function mapBuses(buses) {
     let busX = [];
     if (bus_vector) {
@@ -321,10 +316,9 @@ function mapBuses(buses) {
     map.addLayer(bus_vector);
 }
 
-// Limit to stops associated with chosen routes
+// Update map with stops on selected route
 function validStops() {
     let stopsSubset = [];
-    console.log(bus_route);
     if (!(bus_route == "All Routes")) {
         map.removeLayer(stops_vector)
     }
@@ -386,14 +380,20 @@ function renderMap(data) {
             return style
         }
     });
+    stops_vector.setZIndex(1);
     map.addLayer(stops_vector);
 }
 
 // Filter dropdown for bus routes of interest
 $('#drop-btn').click(function () {
     bus_route = $(this).prev().find('select').val();
-    bus_route = bus_route.replace(/ /g, '');
-    validStops();
+    if (bus_route == "All Routes") {
+        map.removeLayer(stops_vector);
+        renderMap(all_points)
+    } else {
+        bus_route = bus_route.replace(/ /g, '');
+        validStops();
+    }
     vectorizeRoutes(getRoute);
 });
 
