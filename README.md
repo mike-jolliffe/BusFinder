@@ -27,3 +27,5 @@ to a user:
 ![Selected route](Route_4.png)
 
 
+### Arrival times for route 4 buses
+![Arrival times](Times.png)
